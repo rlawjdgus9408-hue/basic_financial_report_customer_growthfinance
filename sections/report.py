@@ -14,6 +14,10 @@ def render_report_generation(**_):
     st.markdown("---")
     st.markdown("### 6. 최종보고서 생성")
     st.info("사이드바의 '보고서 생성' 버튼을 클릭하여 보고서를 생성하세요.")
+    st.caption(
+        "※ 본 보고서는 AI가 자동으로 생성한 결과로, 실제와 다르거나 정확하지 않을 수 있습니다. "
+        "정확한 재무 분석이 필요하시면 그로스파이낸스에 문의해 주세요."
+    )
 
 
 def render_report_sidebar(company_info, template_file, check_results, score,
@@ -90,4 +94,7 @@ def render_report_sidebar(company_info, template_file, check_results, score,
             data=st.session_state['report_bytes'],
             file_name=st.session_state['report_filename'],
             use_container_width=True
+        )
+        st.sidebar.caption(
+            "※ AI 자동 생성 결과로 부정확할 수 있습니다. 정확한 분석은 그로스파이낸스에 문의해 주세요."
         )
