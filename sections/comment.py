@@ -164,6 +164,31 @@ def render_ai_comment_chat():
                         st.rerun()
 
 
+def build_indicator_table(all_selected, years, bs_metrics, is_metrics, common_metrics):
+    """선택된 지표명 목록 -> (표 형태 레코드 리스트, 템플릿용 탭 구분 텍스트).
+
+    render_comments()(인터랙티브 화면)와 auto_pipeline.py(고객용 자동분석)가 공유해,
+    '선택된 지표를 표로 만드는 규칙'이 두 군데로 갈라지지 않게 한다."""
+    table_data = []
+    for ind in all_selected:
+        row = {'지표명': ind}
+        for yr in years:
+            val = next(
+                (m[yr][ind] for m in (bs_metrics, is_metrics, common_metrics)
+                 if m.get(yr) and ind in m[yr]),
+                None
+            )
+            row[yr] = f"{val:,.2f}" if val is not None else "-"
+        table_data.append(row)
+
+    lines = ["■ 주요 재무지표", "지표명\t" + "\t".join(years)]
+    for row in table_data:
+        lines.append(row['지표명'] + "".join(f"\t{row.get(yr,'-')}" for yr in years))
+    table_text = "\n".join(lines)
+
+    return table_data, table_text
+
+
 def render_comments():
     """종합의견 렌더링"""
     st.markdown("### 5. 종합의견")
@@ -183,27 +208,15 @@ def render_comments():
                         + selected_indicators.get('common', []))
 
         if all_selected and years:
-            table_data = []
-            for ind in all_selected:
-                row = {'지표명': ind}
-                for yr in years:
-                    val = next(
-                        (m[yr][ind] for m in (bs_metrics, is_metrics, common_metrics)
-                         if m.get(yr) and ind in m[yr]),
-                        None
-                    )
-                    row[yr] = f"{val:,.2f}" if val is not None else "-"
-                table_data.append(row)
+            table_data, table_text = build_indicator_table(
+                all_selected, years, bs_metrics, is_metrics, common_metrics
+            )
 
             df_selected = pd.DataFrame(table_data)
             st.dataframe(df_selected.set_index('지표명'), use_container_width=True)
             st.caption("※ 문서 포함을 선택한 지표입니다.")
 
-            # 템플릿용 표 문자열 생성 및 세션 저장
-            lines = ["■ 주요 재무지표", "지표명\t" + "\t".join(years)]
-            for row in table_data:
-                lines.append(row['지표명'] + "".join(f"\t{row.get(yr,'-')}" for yr in years))
-            st.session_state.selected_indicators_table = "\n".join(lines)
+            st.session_state.selected_indicators_table = table_text
 
 
     render_ai_comment_chat()

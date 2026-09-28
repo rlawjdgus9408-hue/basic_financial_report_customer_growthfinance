@@ -4,7 +4,7 @@
 """
 import streamlit as st
 
-TOTAL_WIZARD_STEPS = 5  # 진행도/설문 흐름은 1~5단계 기준 (6단계는 최종 생성 화면)
+TOTAL_WIZARD_STEPS = 3  # 진행도/설문 흐름은 1~3단계 기준 (4단계는 최종 생성 화면)
 
 STEP_INTROS = {
     1: "안녕하세요, 그로스파이낸스입니다 👋<br>기초재무진단보고서 작성을 위한 <b>기본정보</b>를 입력해 주세요."
@@ -13,10 +13,8 @@ STEP_INTROS = {
        "1. 각 항목에 대해 <b>예/아니오 중 하나</b>를 선택해 주세요.<br>"
        "2. 재무관리를 하시는 <b>목적(방향성)</b>을 선택해 주시고, 해당 사항이 없다면 <b>기타 항목에 직접 작성</b>해 주세요.<br>"
        "3. 현재 <b>보유하신 회사 자료</b>도 선택해 주세요.",
-    3: "<b>표준 재무제표(재무상태표) 및 손익계산서</b> 등의 자료를 업로드해 주세요. "
-       "다른 파일 형식이어도 상관없습니다 — AI가 표준 양식으로 자동 변환해 드려요.",
-    4: "업로드하신 자료를 바탕으로 자동 추출된 <b>재무 데이터와 지표</b>를 확인해 주세요.",
-    5: "마지막 입력 단계입니다! 지금까지의 내용을 바탕으로 <b>종합의견</b>을 작성해 주세요.",
+    3: "마지막 입력 단계입니다! <b>표준 재무제표(재무상태표) 및 손익계산서</b> 등의 자료를 업로드해 주세요. "
+       "다른 파일 형식이어도 상관없습니다 — AI가 자동으로 분석해서 다음 화면에서 바로 보고서를 만들어 드려요.",
 }
 
 
@@ -65,23 +63,6 @@ def render_sidebar_progress(step, total=TOTAL_WIZARD_STEPS):
         </div>
         <div style="text-align:right; font-size:11px; color:#9AA0A6; margin-top:5px;">{step} / {total} 단계 · {percent}%</div>
         """, unsafe_allow_html=True)
-
-
-def render_upload_placeholder(tab_labels=None, height=160):
-    """자료 업로드 전, 실제 표/지표가 나올 자리를 채우는 스켈레톤 placeholder."""
-    def _box():
-        st.markdown(f"""
-        <div class="gf-upload-placeholder" style="min-height:{height}px;">
-            <span>Uploading<span class="gf-dot">.</span><span class="gf-dot">.</span><span class="gf-dot">.</span></span>
-        </div>
-        """, unsafe_allow_html=True)
-
-    if tab_labels:
-        for tab in st.tabs(tab_labels):
-            with tab:
-                _box()
-    else:
-        _box()
 
 
 def render_step_nav(step, total=TOTAL_WIZARD_STEPS):

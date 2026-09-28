@@ -236,17 +236,10 @@ def calculate_common_metrics(bs_accounts, is_accounts, years):
     return metrics
 
 
-# ── 렌더링 ───────────────────────────────────────────────────────────────────
-
-def render_financial_metrics(df_bs, df_is, years):
-    st.markdown("---")
-    st.markdown("### 3-1. 재무지표 연도별 추이")
-
-    if not years:
-        st.warning("연도 정보가 없습니다.")
-        return
-
-    # 계정 추출
+def compute_all_metrics(df_bs, df_is, years):
+    """BS/IS에서 계정을 추출해 세 지표 딕셔너리(bs_metrics, is_metrics, common_metrics)를
+    계산한다. 인터랙티브 화면(render_financial_metrics)과 고객용 자동분석 파이프라인
+    (auto_pipeline.py) 양쪽에서 공유해, 계정 키워드 목록이 두 군데로 갈라지지 않게 한다."""
     bs_accounts = {
         '현금및현금성자산': find_account(df_bs, ['현금', '현금성자산', '예금', '당좌예금'], years),
         '단기금융자산':     find_account(df_bs, ['단기금융자산', '단기투자', '유동금융자산'], years),
@@ -274,6 +267,20 @@ def render_financial_metrics(df_bs, df_is, years):
     bs_metrics     = calculate_bs_metrics(bs_accounts, is_accounts, years)
     is_metrics     = calculate_is_metrics(is_accounts, years)
     common_metrics = calculate_common_metrics(bs_accounts, is_accounts, years)
+    return bs_metrics, is_metrics, common_metrics
+
+
+# ── 렌더링 ───────────────────────────────────────────────────────────────────
+
+def render_financial_metrics(df_bs, df_is, years):
+    st.markdown("---")
+    st.markdown("### 3-1. 재무지표 연도별 추이")
+
+    if not years:
+        st.warning("연도 정보가 없습니다.")
+        return
+
+    bs_metrics, is_metrics, common_metrics = compute_all_metrics(df_bs, df_is, years)
 
     # ── 문서 포함 지표 선택 ──
     st.markdown("#### 문서 포함 지표 선택")
