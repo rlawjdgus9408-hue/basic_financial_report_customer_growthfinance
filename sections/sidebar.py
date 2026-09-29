@@ -106,8 +106,32 @@ def _render_temp_save_load():
         st.rerun()
 
 
+def _render_api_key_check():
+    """배포 환경(Streamlit Cloud Secrets)에 Gemini API 키가 제대로 들어갔는지 바로 확인하는 도구.
+    파일 업로드까지 가지 않아도 키 등록 여부/실제 호출 가능 여부를 바로 알 수 있게 한다."""
+    from sections.ai_client import configured_value, gemini_model
+
+    with st.sidebar.expander("⚙️ API 키 확인"):
+        api_key = configured_value("Gemini", "api_key")
+        if not api_key:
+            st.error("GEMINI_API_KEY가 설정되지 않았습니다.")
+            return
+
+        st.caption(f"키 등록됨 (...{api_key[-4:]})")
+        if st.button("연결 테스트", key="btn_api_key_test", use_container_width=True):
+            model = gemini_model()
+            with st.spinner("Gemini API 호출 테스트 중..."):
+                try:
+                    from google import genai
+                    client = genai.Client(api_key=api_key)
+                    client.models.generate_content(model=model, contents="ping")
+                    st.success(f"연결 성공! (모델: {model})")
+                except Exception as error:
+                    st.error(f"연결 실패: {error}")
+
+
 def render_sidebar_chrome():
-    """사이드바 상단 공통 영역: 제목 + 목차 + 다시 실행 + 임시저장/불러오기"""
+    """사이드바 상단 공통 영역: 제목 + 목차 + 다시 실행 + 임시저장/불러오기 + API 키 확인"""
     st.sidebar.title("메뉴")
     st.sidebar.markdown("---")
 
@@ -119,3 +143,6 @@ def render_sidebar_chrome():
 
     st.sidebar.markdown("---")
     _render_temp_save_load()
+
+    st.sidebar.markdown("---")
+    _render_api_key_check()
